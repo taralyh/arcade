@@ -1,0 +1,71 @@
+/* 
+Open the Suggestions tab and choose a template to get started creating different content types for your pop-up. 
+To learn more about using Arcade to create pop-up content visit: 
+https://developers.arcgis.com/arcade/guide/profiles/#popup-element 
+*/
+
+var all = Schema($feature)
+var fields = all["fields"]
+
+// function to give output table an alternating bg colour
+function isOdd(value){
+  // Returns either 1 or 0.
+  // 1 = odd number
+  // 0 = even number
+  // Boolean() converts the raw value to a bool
+  var val = Boolean(value % 2);
+  if (val) {
+    return "rgba(255,255,255,0.1)"
+  }
+  else {
+    return "rgba(0,0,0,0.1)";
+  }
+}
+
+// set html to build off of
+var outhtml = `<table><tr><td style="width:50%;"></td><td style="width:50%;"></td></tr>`
+
+var n=0
+
+// iterate through dictionary for each field
+for (var a in fields) {
+  
+  Console(a)
+  
+  // set field name
+  var fname = fields[a].name
+  
+  Console("." + fname)
+  
+  // skip objectid
+  if (a>0) {
+  
+    // check if field empty
+    if (IsEmpty($feature[fname]) == false) {
+    
+      // set input number for isOdd function (probably a better way to do this...)
+      var n = n+1
+      
+      // round outputs for double field type
+      if (fields[a].type == 'esriFieldTypeDouble') {
+        Console(".." + $feature[fname])
+        
+        // set html
+        var outhtml = outhtml + `<tr style="background-color:${isOdd(n)}"><td><b>${fields[a].alias}</b></td><td style="padding-left:10px">${Round($feature[fname],2)}</td></tr>`
+      }
+      
+      else {
+        Console("..." + $feature[fname])
+        
+        // set html
+        var outhtml = outhtml + `<tr style="background-color:${isOdd(n)}"><td><b>${fields[a].alias}</b></td><td style="padding-left:10px">${$feature[fname]}</td></tr>`
+      }
+    }
+  }
+}
+
+
+return { 
+	type : 'text', 
+	text : outhtml + `</table>`
+}
